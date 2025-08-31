@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Tulostimen Kustannuslaskuri</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <main>
+        <!-- Compact header -->
+        <div class="app-header">
+          <div class="app-title">
+            <h1>🔌 3D Tulostimen Kustannuslaskuri</h1>
+            <div class="app-actions">
+              <button
+                type="button"
+                id="clear-memory-btn"
+                class="btn btn-ghost btn-sm"
+              >
+                🗑️ Tyhjennä
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="calculator-layout">
+          <div class="main-content">
+            <!-- Tulostin ja asetukset - KOMPAKTI -->
+            <div class="section input-section">
+              <h2>🖨️ Tulostin ja asetukset</h2>
+
+              <!-- Tulostin - full width -->
+              <div class="form-group full-width">
+                <label for="printer-select">Valitse tulostin:</label>
+                <select id="printer-select" class="form-control">
+                  <option value="anycubic-kobra-3-v2">
+                    Anycubic Kobra 3 V2
+                  </option>
+                  <option value="prusa-mk4">Prusa MK4</option>
+                  <option value="ender-3-v3-se">Ender 3 V3 SE</option>
+                  <option value="bambu-lab-p1p">Bambu Lab P1P</option>
+                  <option value="ultimaker-s5">Ultimaker S5</option>
+                  <option value="custom">Mukautettu</option>
+                </select>
+              </div>
+
+              <!-- Compact grid for numeric inputs -->
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label for="power-usage">Tehonkulutus (W):</label>
+                  <input
+                    type="number"
+                    id="power-usage"
+                    class="form-control"
+                    value="200"
+                    step="10"
+                    min="50"
+                    max="1000"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="electricity-price">Sähkön hinta (€/kWh):</label>
+                  <input
+                    type="number"
+                    id="electricity-price"
+                    class="form-control"
+                    value="0.08"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="print-time">Tulostusaika (h):</label>
+                  <input
+                    type="number"
+                    id="print-time"
+                    class="form-control"
+                    value="8"
+                    step="0.5"
+                    min="0.1"
+                  />
+                </div>
+              </div>
+
+              <!-- Help texts in compact format -->
+              <div class="help-grid">
+                <small class="help-text">Automaattinen</small>
+                <small class="help-text">Suomi: 0.08-0.15</small>
+                <small class="help-text">
+                  <div class="example-buttons">
+                    <button type="button" class="btn-example" data-time="2">
+                      2h
+                    </button>
+                    <button type="button" class="btn-example" data-time="8">
+                      8h
+                    </button>
+                    <button type="button" class="btn-example" data-time="24">
+                      24h
+                    </button>
+                  </div>
+                </small>
+              </div>
+            </div>
+
+            <!-- Materiaalit - KOMPAKTI -->
+            <div class="section materials-section">
+              <h2>🧵 Materiaalit</h2>
+
+              <div class="filament-summary">
+                <div class="summary-item">
+                  <span class="summary-label">Kokonaismäärä:</span>
+                  <span class="summary-value" id="total-filament-weight-display"
+                    >137 g</span
+                  >
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Kokonaiskustannus:</span>
+                  <span class="summary-value" id="total-filament-cost-display"
+                    >2,74 €</span
+                  >
+                </div>
+              </div>
+
+              <div id="filament-list">
+                <!-- Filament entries will be added here -->
+              </div>
+
+              <button
+                type="button"
+                id="add-filament-btn"
+                class="btn btn-primary"
+              >
+                Lisää filamentti
+              </button>
+
+              <input type="hidden" id="total-filament-weight" value="0" />
+              <input type="hidden" id="total-filament-cost" value="0,00 €" />
+            </div>
+
+            <!-- Lisäkustannukset - KOMPAKTI -->
+            <div class="section optional-section">
+              <h2>
+                📊 Lisäkustannukset
+                <span class="optional-badge">Valinnainen</span>
+              </h2>
+
+              <div class="toggle-section">
+                <label class="toggle-label">
+                  <input
+                    type="checkbox"
+                    id="enable-additional-costs"
+                    class="toggle-checkbox"
+                    checked
+                  />
+                  <span class="toggle-slider"></span>
+                  <span class="toggle-text">Ota lisäkustannukset huomioon</span>
+                </label>
+              </div>
+
+              <div
+                class="additional-costs-content"
+                id="additional-costs-content"
+                style="display: block"
+              >
+                <!-- Compact 2x2 grid for additional costs -->
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="failed-prints">Epäonnistuneet (%)</label>
+                    <div class="input-with-slider">
+                      <input
+                        type="range"
+                        id="failed-prints-slider"
+                        class="range-slider"
+                        min="0"
+                        max="20"
+                        value="5"
+                        step="1"
+                      />
+                      <input
+                        type="number"
+                        id="failed-prints"
+                        class="form-control range-input"
+                        value="5"
+                        step="1"
+                        min="0"
+                        max="100"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="maintenance-cost">Huolto (€/kk)</label>
+                    <div class="input-with-indicator">
+                      <input
+                        type="number"
+                        id="maintenance-cost"
+                        class="form-control"
+                        value="5"
+                        step="1"
+                        min="0"
+                      />
+                      <div class="input-indicator">€/kk</div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="labor-cost">Työmaksu (€)</label>
+                    <div class="input-with-indicator">
+                      <input
+                        type="number"
+                        id="labor-cost"
+                        class="form-control"
+                        value="0"
+                        step="0.50"
+                        min="0"
+                      />
+                      <div class="input-indicator">€</div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <small class="help-text">Tyypillisesti 5-15%</small>
+                    <small class="help-text">Nozzle, lämmitin, hihnat</small>
+                    <small class="help-text">Valmistelu ja valvonta</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sidebar">
+            <!-- Tulokset -->
+            <div class="section results-section">
+              <h2>💰 Tulokset</h2>
+
+              <!-- Peruskulut -->
+              <div class="results-section">
+                <h3 class="results-section-title">⚡ Peruskulut</h3>
+                <div class="results-grid">
+                  <div class="result-item">
+                    <span class="result-label">Sähkönkulutus:</span>
+                    <span class="result-value" id="energy-consumption"
+                      >1.6 kWh</span
+                    >
+                  </div>
+                  <div class="result-item">
+                    <span class="result-label">Sähkön kustannukset:</span>
+                    <span class="result-value" id="electricity-cost"
+                      >0,13 €</span
+                    >
+                  </div>
+                  <div class="result-item">
+                    <span class="result-label">Filamentin kustannukset:</span>
+                    <span class="result-value" id="filament-cost">0,00 €</span>
+                  </div>
+                  <div class="result-item">
+                    <span class="result-label">Tehonkulutus:</span>
+                    <span class="result-value" id="avg-power">200 W</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Lisäkustannukset erittely -->
+              <div class="results-section">
+                <h3 class="results-section-title">📊 Lisäkustannukset</h3>
+                <div class="results-grid">
+                  <div class="result-item">
+                    <span class="result-label"
+                      >Epäonnistuneet tulostukset:</span
+                    >
+                    <span class="result-value" id="failed-prints-cost"
+                      >0,00 €</span
+                    >
+                  </div>
+                  <div class="result-item">
+                    <span class="result-label">Huoltokustannukset:</span>
+                    <span class="result-value" id="maintenance-costs"
+                      >0,00 €</span
+                    >
+                  </div>
+                  <div class="result-item">
+                    <span class="result-label">Työmaksu:</span>
+                    <span class="result-value" id="labor-costs">0,00 €</span>
+                  </div>
+                  <div class="result-item">
+                    <span class="result-label">Lisäkustannukset yhteensä:</span>
+                    <span class="result-value" id="additional-costs"
+                      >0,00 €</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- Yhteenveto -->
+              <div class="results-section">
+                <h3 class="results-section-title">💎 Yhteenveto</h3>
+                <div class="results-grid">
+                  <div class="result-item total-cost-item">
+                    <span class="result-label">Kokonaiskustannukset:</span>
+                    <span class="result-value" id="total-cost">2,87 €</span>
+                  </div>
+                  <div class="result-item">
+                    <span class="result-label">Kustannus/tunti:</span>
+                    <span class="result-value" id="cost-per-hour">0,36 €</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lisätietoja -->
+            <div class="section info-section">
+              <h2>ℹ️ Lisätietoja</h2>
+              <div class="info-grid">
+                <div class="info-item">
+                  <h3>Anycubic Kobra 3 V2</h3>
+                  <ul>
+                    <li><strong>Keskimääräinen tehonkulutus:</strong> 200W</li>
+                    <li>
+                      <strong>Lämmitin:</strong> 40W (lattia) + 25W (hotend)
+                    </li>
+                    <li><strong>Moottorit ja elektroniikka:</strong> ~135W</li>
+                    <li><strong>Virtalähde:</strong> 350W</li>
+                  </ul>
+                </div>
+                <div class="info-item">
+                  <h3>Filamentin hinnat (ohjeellisia)</h3>
+                  <ul>
+                    <li><strong>PLA:</strong> 15-25 €/kg</li>
+                    <li><strong>ABS:</strong> 20-30 €/kg</li>
+                    <li><strong>PETG:</strong> 25-35 €/kg</li>
+                    <li><strong>TPU:</strong> 30-50 €/kg</li>
+                    <li><strong>Premium filamentit:</strong> 40-80 €/kg</li>
+                  </ul>
+                </div>
+                <div class="info-item">
+                  <h3>Kustannustekijät</h3>
+                  <ul>
+                    <li>
+                      <strong>Epäonnistuneet tulostukset:</strong> 5-15%
+                      tyypillinen
+                    </li>
+                    <li>
+                      <strong>Huolto:</strong> Nozzle, lämmitin, moottorit
+                    </li>
+                    <li>
+                      <strong>Työmaksu:</strong> Mallin valmistelu, suunnittelu
+                      ja valvonta
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
